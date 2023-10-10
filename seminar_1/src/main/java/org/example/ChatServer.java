@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -50,9 +52,9 @@ public class ChatServer extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 serverStatus = SERVER_STOPPED;
-                chatClient.connectionStatus = chatClient.DISCONNECTED;
                 update(serverStatus + "\n");
                 chatClient.update("Server disconnected\n");
+                chatClient.connectionStatus = chatClient.DISCONNECTED;
             }
         });
         return servBottons;
@@ -69,27 +71,35 @@ public class ChatServer extends JFrame {
     }
     public void clientLogin(String IP, String Port, String NickName, String password) {
         if (serverStatus == SERVER_STOPPED) {
-            chatClient.update("Can\'t connect to server\n");
+            chatClient.updateSRV("Can\'t connect to server");
         }
         else if (IP.isEmpty() || Port.isEmpty() ||
                 NickName.isEmpty() || password.isEmpty()) {
-            chatClient.update("Connection failed\n");
+            chatClient.updateSRV("Connection failed");
         }
         else {
             chatClient.connectionStatus = chatClient.CONNECTED;
-            chatClient.update( "Connection successful\n");
-            message = NickName + ": joined to chat\n";
-            update(message);
-            chatClient.update(message);
+            chatClient.updateSRV( "Connection successful");
+            sendStory();
+            message = NickName + ": joined to chat";
+            update(message + "\n");
+            chatClient.updateSRV(message);
             Logging(message);
         }
     }
-
     public void Logging (String msg) {
         try (FileWriter fw = new FileWriter("log.txt", true))
         {
             fw.append(msg);
-
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void sendStory() {
+        try (BufferedReader br = new BufferedReader( new FileReader("log.txt")))
+        {
+            while (br.readLine() != null)
+                chatClient.updateSRV(br.readLine());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

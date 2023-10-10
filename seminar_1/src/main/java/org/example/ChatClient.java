@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class ChatClient extends JFrame {
     private static final int WIDTH = 500;
@@ -39,13 +41,16 @@ public class ChatClient extends JFrame {
         btnSend.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (connectionStatus == DISCONNECTED) {
-                    update("No connection to server\n");
-                } else {
-                    message = NickName + ": " + textSend.getText() + "\n";
-                    update(message);
-                    cs.update(message);
+                update(textSend.getText());
+            }
+        });
+        textSend.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    update(textSend.getText());
                 }
+//                super.keyPressed(e);
             }
         });
 
@@ -62,6 +67,7 @@ public class ChatClient extends JFrame {
         JButton btnLogin = new JButton("Login");
         panelLayer1.add(textIP);
         panelLayer1.add(textPort);
+        panelLayer1.add(new JButton());
         panelLayer2.add(textNickName);
         panelLayer2.add(password);
         panelLayer2.add(btnLogin);
@@ -92,6 +98,15 @@ public class ChatClient extends JFrame {
 //        showToClient.append(client + ": " + msg +"\n");
 //    }
     public void update(String msg) {
-        clientText.append(msg);
+        message = NickName + ": " + msg + "\n";
+        clientText.append(message);
+        if (connectionStatus == DISCONNECTED) {
+            clientText.append("No connection to server\n");
+        } else {
+            cs.update(message);
+        }
+    }
+    public void updateSRV(String msg) {
+        clientText.append(msg + "\n");
     }
 }
