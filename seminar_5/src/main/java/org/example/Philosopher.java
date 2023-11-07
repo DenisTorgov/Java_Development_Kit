@@ -22,6 +22,8 @@ public class Philosopher extends  Thread {
         System.out.println(currentThread().getName() + " " + action);
         while (meals > 0) {
             tryToEat(u, this);
+            action = THINKS;
+            changeForkState(u, this, false);
         }
     }
     private synchronized void tryToEat(University u, Philosopher ph) {
@@ -31,7 +33,6 @@ public class Philosopher extends  Thread {
             System.out.println(currentThread().getName() + " "
                     + action + ". "+ meals + " meals left.");
         }
-        changeForkState(u, ph);
 //        try {
 //            wait();
 //        } catch (InterruptedException e) {
@@ -42,28 +43,27 @@ public class Philosopher extends  Thread {
         int i = Integer.parseInt(ph.name);
         if (i == 1) {
             if (!u.forks[u.forks.length-1] && !u.forks[0]) {
-                u.forks[u.forks.length-1] = true;
-                u.forks[0] = true;
+                changeForkState(u, ph,true);
                 notifyAll();
                 return true;
             }
             return false;
         }
         if ((!u.forks[i-2] && !u.forks[i-1]) || (i == u.forks.length)) {
-            changeForkState(u, ph);
+            changeForkState(u, ph,true);
             notifyAll();
             return  true;
         }
         return false;
     }
-    private void changeForkState(University u, Philosopher ph) {
+    private void changeForkState(University u, Philosopher ph, boolean b) {
         int i = Integer.parseInt(ph.name);
         if (i == 1) {
-            u.forks[u.forks.length-1] = !u.forks[u.forks.length-1];
-            u.forks[0] = !u.forks[0];
+            u.forks[u.forks.length-1] = b;
+            u.forks[0] = b;
         } else {
-            u.forks[i-2] = !u.forks[i-2];
-            u.forks[i-1] = !u.forks[i-1];
+            u.forks[i-2] = b;
+            u.forks[i-1] = b;
         }
     }
 }
